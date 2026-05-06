@@ -112,9 +112,6 @@ app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(
 
 // ── PERSISTENT HWID ──
 const crypto = require('crypto')
-const os = require('os')
-const fs = require('fs')
-const path = require('path')
 
 function getOrCreateHWID() {
     const hwidFile = path.join(os.homedir(), 'AppData', 'Roaming', 'Vortex', 'hwid.dat')
