@@ -1,0 +1,64 @@
+{
+  "name": "vortex-launcher",
+  "version": "0.1.0",
+  "description": "Vortex Launcher - Multi-game Enhancement Platform",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "obfuscate": "javascript-obfuscator src/renderer.js --output src/renderer.js --compact true --string-array true --rotate-string-array true --string-array-encoding rc4 --dead-code-injection true"
+  },
+  "author": "TheTechGuy",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^36.2.1",
+    "electron-builder": "^26.8.1",
+    "javascript-obfuscator": "^5.4.2",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.5"
+  },
+  "build": {
+    "appId": "com.vortex.launcher",
+    "productName": "Vortex Launcher",
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build-icon.png"
+    },
+    "files": [
+      "main.js",
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Vortex Launcher",
+      "license": "installer/license.txt",
+      "artifactName": "VortexLauncher-Setup-${version}.exe"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Z1PPYCAT",
+      "repo": "VortexLauncher",
+      "private": true,
+      "releaseType": "release"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.3"
+  }
+}

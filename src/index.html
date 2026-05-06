@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vortex Launcher</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" style="display:none;position:fixed;inset:0;background:#0a0a06;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+        <div class="loading-logo-circle">V</div>
+        <div class="loading-vortex-text">VORTEX</div>
+        <div class="loading-spinner-ring"></div>
+        <div id="loading-msg" class="loading-msg">LOADING...</div>
+    </div>
+
+    <!-- Corner Decorations -->
+    <div class="corner-deco tl"></div>
+    <div class="corner-deco tr"></div>
+    <div class="corner-deco bl"></div>
+    <div class="corner-deco br"></div>
+
+    <!-- LOGIN PAGE -->
+    <div id="login-page" class="login-page">
+        <div class="login-bg-grid"></div>
+        <div class="login-box">
+            <div class="login-corner tl"></div>
+            <div class="login-corner tr"></div>
+            <div class="login-corner bl"></div>
+            <div class="login-corner br"></div>
+
+            <div class="login-logo">
+                <img src="../src/assets/icon.png" class="login-logo-img" alt="Vortex">
+                <div class="login-logo-text">
+                    <span class="login-vortex">VORTEX</span>
+                    <span class="login-launcher">-- LAUNCHER --</span>
+                </div>
+            </div>
+
+            <div class="login-tabs">
+                <button class="login-tab active" data-tab="login" onclick="switchLoginTab('login')">LOGIN</button>
+                <button class="login-tab" data-tab="register" onclick="switchLoginTab('register')">REGISTER</button>
+                <button class="login-tab" data-tab="forgot" onclick="switchLoginTab('forgot')">FORGOT</button>
+            </div>
+
+            <div id="login-status" style="display:none;text-align:center;font-size:12px;margin:8px 0;padding:8px;border-radius:4px;background:rgba(0,0,0,0.3)"></div>
+
+            <div id="form-login" class="login-form-section active">
+                <div class="input-group">
+                    <label>USERNAME</label>
+                    <input type="text" id="login-user" placeholder="Enter your username">
+                </div>
+                <div class="input-group">
+                    <label>PASSWORD</label>
+                    <input type="password" id="login-pass" placeholder="Enter your password">
+                </div>
+                <button class="login-btn" id="btn-login" onclick="doLogin()">
+                    <span>LOGIN</span><span class="btn-arrow">&#8594;</span>
+                </button>
+                <div class="login-links">
+                    <a href="#" onclick="switchLoginTab('register')">Create account</a>
+                    <a href="#" onclick="switchLoginTab('forgot')">Forgot password?</a>
+                </div>
+            </div>
+
+            <div id="form-register" class="login-form-section">
+                <div class="input-group">
+                    <label>USERNAME</label>
+                    <input type="text" id="reg-user" placeholder="Choose a username">
+                </div>
+                <div class="input-group">
+                    <label>PASSWORD</label>
+                    <input type="password" id="reg-pass" placeholder="Choose a password">
+                </div>
+                <div class="input-group">
+                    <label>CONFIRM PASSWORD</label>
+                    <input type="password" id="reg-pass2" placeholder="Confirm your password">
+                </div>
+                <div class="input-group">
+                    <label>LICENSE KEY</label>
+                    <input type="text" id="reg-key" placeholder="XXXXX-XXXXX-XXXXX-XXXXX">
+                </div>
+                <button class="login-btn" id="btn-register" onclick="doRegister()">
+                    <span>CREATE ACCOUNT</span><span class="btn-arrow">&#8594;</span>
+                </button>
+                <div class="login-links">
+                    <a href="#" onclick="switchLoginTab('login')">Already have an account?</a>
+                    <a href="#">Buy a key</a>
+                </div>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div id="form-forgot" class="login-form-section">
+                <div class="input-group">
+                    <label>USERNAME</label>
+                    <input type="text" id="forgot-user" placeholder="Enter your username">
+                </div>
+                <button class="login-btn" id="btn-forgot" onclick="doForgotPassword()">
+                    <span>SEND RESET</span><span class="btn-arrow">&#8594;</span>
+                </button>
+                <div class="login-links">
+                    <a href="#" onclick="switchLoginTab('login')">Back to login</a>
+                </div>
+            </div>
+
+            <div class="login-footer">
+                <span>v0.1</span><span>&#8226;</span>
+                <span>Vortex Launcher</span><span>&#8226;</span>
+                <span>KeyAuth Protected</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app" class="main-app" style="display:none">
+
+        <!-- Titlebar -->
+        <div class="titlebar">
+            <div class="titlebar-logo">
+                <img src="../src/assets/icon.png" class="titlebar-logo-img" alt="V">
+                <div class="logo-words">
+                    <span class="logo-vortex">VORTEX</span>
+                    <span class="logo-launcher">— LAUNCHER —</span>
+                </div>
+            </div>
+            <div class="titlebar-drag"></div>
+            <div class="titlebar-right">
+                <div class="user-pill">
+                    <div class="user-avatar">V</div>
+                    <div class="user-info">
+                        <span class="user-name">TheTechGuy</span>
+                        <span class="user-plan">Premium</span>
+                    </div>
+                    <span class="user-chevron">⌄</span>
+                </div>
+                <div class="win-controls">
+                    <button onclick="window.minimize()" class="wc-btn">─</button>
+                    <button onclick="window.maximize()" class="wc-btn">□</button>
+                    <button onclick="window.closeApp()" class="wc-btn wc-close">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="app-body">
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <nav class="nav">
+                    <a class="nav-item active" data-page="library">
+                        <span class="nav-icon">🎮</span>Library
+                    </a>
+                    <a class="nav-item" data-page="account">
+                        <span class="nav-icon">👤</span>Account
+                    </a>
+                    <a class="nav-item" data-page="settings">
+                        <span class="nav-icon">⚙️</span>Settings
+                    </a>
+                    <a class="nav-item" data-page="discord">
+                        <span class="nav-icon">💬</span>Discord
+                    </a>
+                    <a class="nav-item" data-page="support">
+                        <span class="nav-icon">🎧</span>Support
+                    </a>
+                </nav>
+                <div class="premium-card">
+                    <div class="premium-icon">V</div>
+                    <div class="premium-info">
+                        <span class="prem-label">Premium Status</span>
+                        <span class="prem-status">Active</span>
+                        <span class="prem-expiry">Expires: Dec 31, 2025</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+
+                <!-- Library -->
+                <div id="page-library" class="page active">
+                    <div class="page-header">
+                        <h2>LIBRARY</h2>
+                        <div class="header-right">
+                            <div class="search-box">
+                                <span>🔍</span>
+                                <input type="text" id="search" placeholder="Search games...">
+                            </div>
+                            <select class="filter-select" id="filter">
+                                <option value="all">All Games</option>
+                                <option value="active">Active</option>
+                                <option value="soon">Coming Soon</option>
+                            </select>
+                            <div class="view-btns">
+                                <button class="vbtn active">⊞</button>
+                                <button class="vbtn">≡</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="game-grid" id="game-grid"></div>
+                </div>
+
+                <!-- Account -->
+                <div id="page-account" class="page">
+                    <div class="page-header"><h2>ACCOUNT</h2></div>
+                    <div class="account-page">
+                        <div class="account-grid">
+                            <div class="card">
+                                <h3>&#128100; ACCOUNT INFO</h3>
+                                <div class="row"><span>Username</span><span id="acc-username" class="gold">-</span></div>
+                                <div class="row"><span>Plan</span><span id="acc-plan" class="gold">-</span></div>
+                                <div class="row"><span>Status</span><span id="acc-status" class="green">Active</span></div>
+                                <div class="row"><span>Expires</span><span id="acc-expiry">-</span></div>
+                                <div class="row"><span>License Key</span><span id="acc-key" class="small-text">-</span></div>
+                            </div>
+                            <div class="card">
+                                <h3>&#128187; HARDWARE INFO</h3>
+                                <div class="row"><span>Platform</span><span id="acc-platform">-</span></div>
+                                <div class="row"><span>Screen</span><span id="acc-screen">-</span></div>
+                                <div class="row"><span>Language</span><span id="acc-lang">-</span></div>
+                                <div class="row"><span>Timezone</span><span id="acc-tz">-</span></div>
+                                <div class="row"><span>HWID</span><span id="acc-hwid" class="small-text">-</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>&#128276; SUBSCRIPTION</h3>
+                            <div class="sub-cards">
+                                <div class="sub-card">
+                                    <span class="sub-icon">&#9200;</span>
+                                    <span class="sub-label">Time Remaining</span>
+                                    <span class="sub-value" id="acc-timeleft">-</span>
+                                </div>
+                                <div class="sub-card">
+                                    <span class="sub-icon">&#127381;</span>
+                                    <span class="sub-label">Games Access</span>
+                                    <span class="sub-value green">All Games</span>
+                                </div>
+                                <div class="sub-card">
+                                    <span class="sub-icon">&#128273;</span>
+                                    <span class="sub-label">Key Status</span>
+                                    <span class="sub-value green">Valid</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div id="page-settings" class="page">
+                    <div class="page-header"><h2>SETTINGS</h2></div>
+                    <div class="settings-page">
+                        <div class="card">
+                            <h3>&#127759; APPEARANCE</h3>
+                            <div class="row">
+                                <span>Theme</span>
+                                <div class="theme-btns">
+                                    <button class="theme-btn active" id="theme-dark" onclick="setTheme('dark')">&#127762; Dark</button>
+                                    <button class="theme-btn" id="theme-light" onclick="setTheme('light')">&#9728; Light</button>
+                                    <button class="theme-btn" id="theme-gold" onclick="setTheme('gold')">&#10024; Gold</button>
+                                </div>
+                            </div>
+                            <div class="row"><span>Compact Mode</span><label class="toggle"><input type="checkbox" id="set-compact" onchange="toggleCompact(this)"><span class="slider"></span></label></div>
+                            <div class="row"><span>Show Grid Lines</span><label class="toggle"><input type="checkbox" id="set-grid" checked onchange="toggleGrid(this)"><span class="slider"></span></label></div>
+                        </div>
+                        <div class="card">
+                            <h3>&#9881; APP SETTINGS</h3>
+                            <div class="row"><span>Launch on startup</span><label class="toggle"><input type="checkbox" id="set-startup"><span class="slider"></span></label></div>
+                            <div class="row"><span>Auto update</span><label class="toggle"><input type="checkbox" id="set-update" checked><span class="slider"></span></label></div>
+                            <div class="row"><span>Minimize to tray</span><label class="toggle"><input type="checkbox" id="set-tray" checked><span class="slider"></span></label></div>
+                            <div class="row"><span>Show trainer overlay</span><label class="toggle"><input type="checkbox" id="set-overlay" checked><span class="slider"></span></label></div>
+                        </div>
+                        <div class="card">
+                            <h3>&#127918; TRAINER SETTINGS</h3>
+                            <div class="row"><span>Auto launch trainer</span><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+                            <div class="row"><span>Keep trainer on top</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                            <div class="row"><span>Show trainer notifications</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                        </div>
+                        <div class="card">
+                            <h3>&#128274; SECURITY</h3>
+                            <div class="row"><span>Version</span><span class="gold">v0.1 Alpha</span></div>
+                            <div class="row"><span>Auth</span><span class="green">KeyAuth Protected</span></div>
+                            <div class="row"><span>Session</span><span id="set-session" class="small-text">Active</span></div>
+                            <div class="row">
+                                <span>Change Password</span>
+                                <button class="gold-btn" style="padding:4px 12px;font-size:11px" onclick="openDiscord()">Via Discord</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discord -->
+                <div id="page-discord" class="page">
+                    <div class="page-header"><h2>DISCORD</h2></div>
+                    <div class="discord-page">
+                        <div class="discord-banner">
+                            <h3>&#127744; VORTEX COMMUNITY</h3>
+                            <p>Join our Discord server for updates, support, and to connect with other Vortex users!</p>
+                            <button class="discord-join-btn" onclick="openDiscord()">&#128279; JOIN VORTEX DISCORD</button>
+                        </div>
+                        <div class="discord-stats">
+                            <div class="discord-stat">
+                                <span class="stat-num" id="discord-members">--</span>
+                                <span class="stat-label">Members</span>
+                            </div>
+                            <div class="discord-stat">
+                                <span class="stat-num">1</span>
+                                <span class="stat-label">Games Supported</span>
+                            </div>
+                            <div class="discord-stat">
+                                <span class="stat-num">v0.1</span>
+                                <span class="stat-label">Current Version</span>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>WHAT YOU GET</h3>
+                            <div class="row"><span>&#128276; Announcements</span><span class="green">&#10003;</span></div>
+                            <div class="row"><span>&#127381; Early Access</span><span class="green">&#10003;</span></div>
+                            <div class="row"><span>&#127381; Support Tickets</span><span class="green">&#10003;</span></div>
+                            <div class="row"><span>&#128176; Reseller Program</span><span class="gold">Premium</span></div>
+                            <div class="row"><span>&#127381; Beta Features</span><span class="gold">Premium</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support -->
+                <div id="page-support" class="page">
+                    <div class="page-header"><h2>SUPPORT</h2></div>
+                    <div class="support-page">
+                        <div class="support-options">
+                            <div class="support-card" onclick="openDiscord()">
+                                <span class="sc-icon">&#127881;</span>
+                                <div class="sc-title">DISCORD SUPPORT</div>
+                                <div class="sc-desc">Join our Discord and open a support ticket for fast help</div>
+                            </div>
+                            <div class="support-card" onclick="openDiscord()">
+                                <span class="sc-icon">&#128030;</span>
+                                <div class="sc-title">BUG REPORT</div>
+                                <div class="sc-desc">Found a bug? Report it in our Discord bug-report channel</div>
+                            </div>
+                            <div class="support-card" onclick="openDiscord()">
+                                <span class="sc-icon">&#128273;</span>
+                                <div class="sc-title">KEY ISSUES</div>
+                                <div class="sc-desc">Problems with your license key? Contact us on Discord</div>
+                            </div>
+                            <div class="support-card" onclick="openDiscord()">
+                                <span class="sc-icon">&#128161;</span>
+                                <div class="sc-title">FEATURE REQUEST</div>
+                                <div class="sc-desc">Have an idea? Share it in our suggestions channel</div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>QUICK LINKS</h3>
+                            <div class="row"><span>Discord Server</span><button class="gold-btn" style="padding:4px 12px;font-size:11px" onclick="openDiscord()">JOIN</button></div>
+                            <div class="row"><span>Version</span><span>v0.1 Alpha</span></div>
+                            <div class="row"><span>Developer</span><span class="gold">TheTechGuy</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Activity Bar -->
+        <div class="activity-bar">
+            <span class="act-label">ACTIVITY</span>
+            <span class="act-text" id="act-text">Vortex Launcher v0.1 released! Check out the latest features.</span>
+            <span class="act-divider">|</span>
+            <span class="act-trainer" id="act-trainer" style="display:none">
+                <span class="trainer-dot"></span>
+                <span id="act-trainer-msg">Downloading trainer...</span>
+            </span>
+            <button class="news-btn" onclick="openDiscord()">VIEW NEWS</button>
+        </div>
+
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+VORTEX LAUNCHER - END USER LICENSE AGREEMENT
+
+Copyright 2026 TheTechGuy. All rights reserved.
+
+1. LICENSE
+   This software is licensed, not sold. By installing Vortex Launcher you agree to these terms.
+
+2. PERMITTED USE
+   - Solo and co-op gameplay enhancement only
+   - Personal use only
+   - Not for use in competitive multiplayer games
+
+3. RESTRICTIONS
+   - You may not redistribute this software
+   - You may not reverse engineer or crack this software
+   - You may not share your license key
+   - One license per user
+
+4. DISCLAIMER
+   This software is provided as-is. Use at your own risk.
+   TheTechGuy is not responsible for any game bans or damages.
+
+5. TERMINATION
+   Your license will be terminated if you violate these terms.
+   No refunds will be issued upon termination.
+
+By installing Vortex Launcher you agree to all terms above.
