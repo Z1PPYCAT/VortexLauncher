@@ -7,6 +7,20 @@
 </head>
 <body>
 
+    <!-- Pre-login Update Check Screen -->
+    <div id="update-check-screen" style="display:flex;position:fixed;inset:0;background:#0a0a06;z-index:99998;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+        <img src="../src/assets/icon.png" style="width:80px;height:80px;border-radius:50%;border:2px solid #D4AF37;box-shadow:0 0 30px rgba(212,175,55,0.5)">
+        <div style="color:#D4AF37;font-size:24px;font-weight:900;letter-spacing:6px;">VORTEX</div>
+        <div class="loading-spinner-ring"></div>
+        <div id="update-check-msg" style="color:#6b6040;font-size:11px;letter-spacing:2px;">CHECKING FOR UPDATES...</div>
+        <div id="update-check-progress" style="display:none;width:300px;">
+            <div style="background:#1a1600;border-radius:4px;height:4px;overflow:hidden;border:1px solid #2a2400">
+                <div id="update-progress-bar" style="height:100%;background:linear-gradient(90deg,#D4AF37,#8B6914);width:0%;transition:width 0.3s"></div>
+            </div>
+            <div id="update-progress-pct" style="color:#D4AF37;font-size:11px;text-align:center;margin-top:6px">0%</div>
+        </div>
+    </div>
+
     <!-- Loading Screen -->
     <div id="loading-screen" style="display:none;position:fixed;inset:0;background:#0a0a06;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
         <div class="loading-logo-circle">V</div>

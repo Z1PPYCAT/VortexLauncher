@@ -42,8 +42,14 @@ autoUpdater.on('update-downloaded', (info) => {
     }
 })
 
+autoUpdater.on('update-not-available', () => {
+    console.log('[Updater] No update available')
+    if (mainWindow) mainWindow.webContents.send('update-not-available')
+})
+
 autoUpdater.on('error', (err) => {
     console.log('[Updater] Error:', err.message)
+    if (mainWindow) mainWindow.webContents.send('update-error')
 })
 const path = require('path')
 const https = require('https')
@@ -70,13 +76,12 @@ function createWindow() {
     })
     mainWindow.loadFile('src/index.html')
 
-    // Check for updates 3 seconds after launch
+    // Check for updates immediately on launch
     mainWindow.webContents.once('did-finish-load', () => {
-        setTimeout(() => {
-            autoUpdater.checkForUpdatesAndNotify().catch(err => {
-                console.log('[Updater] Check failed:', err.message)
-            })
-        }, 3000)
+        // Check immediately
+        autoUpdater.checkForUpdates().catch(err => {
+            console.log('[Updater] Check failed:', err.message)
+        })
     })
 
     // ── SECURITY ──
