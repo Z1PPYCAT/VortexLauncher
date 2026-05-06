@@ -4,6 +4,13 @@ const { autoUpdater } = require('electron-updater')
 // ── AUTO UPDATER ──
 autoUpdater.autoDownload = true
 autoUpdater.autoInstallOnAppQuit = true
+autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: 'Z1PPYCAT',
+    repo: 'VortexLauncher',
+    private: true,
+    token: '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'
+})
 
 autoUpdater.on('checking-for-update', () => {
     console.log('[Updater] Checking for updates...')
