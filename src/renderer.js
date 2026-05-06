@@ -1,26 +1,9 @@
-// ── KeyAuth Config ──
-const KEYAUTH = {
-    name: 'Vortex',
-    ownerid: 'sRW8K7AFHZ',
-    secret: 'f56941b360b8959f0c525b0da1676ca9e0d64b770450dcb407bf1957783385ca',
-    version: '1.0'
-}
-
+// ── KeyAuth (credentials secured in main process) ──
 let sessionId = null
 
-// ── SHA256 ──
-async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message)
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-}
-
-// ── Init KeyAuth ──
 async function initKeyAuth() {
     try {
-        const res = await fetch(`https://keyauth.win/api/1.2/?type=init&name=${KEYAUTH.name}&ownerid=${KEYAUTH.ownerid}&ver=${KEYAUTH.version}`)
-        const data = await res.json()
+        const data = await window.kaInit()
         if (!data.success) return false
         sessionId = data.sessionid
         return true
@@ -29,21 +12,16 @@ async function initKeyAuth() {
     }
 }
 
-// ── KeyAuth Request ──
 async function keyauthRequest(type, fields = {}) {
     if (!sessionId) {
         const ok = await initKeyAuth()
         if (!ok) return { success: false, message: 'Failed to connect to auth server!' }
     }
-    const params = new URLSearchParams({
-        type,
-        sessionid: sessionId,
-        name: KEYAUTH.name,
-        ownerid: KEYAUTH.ownerid,
-        ...fields
-    })
-    const res = await fetch(`https://keyauth.win/api/1.2/?${params}`)
-    return res.json()
+    try {
+        return await window.kaRequest(type, fields, sessionId)
+    } catch(e) {
+        return { success: false, message: 'Connection error' }
+    }
 }
 
 // ── HWID ──
@@ -424,6 +402,23 @@ function renderGames(filter = 'all', search = '') {
     })
 }
 
+// ── DISCORD MEMBER COUNT ──
+async function fetchDiscordMembers() {
+    try {
+        const res = await fetch('https://discord.com/api/v10/invites/wdrj5auhEB?with_counts=true')
+        const data = await res.json()
+        const el = document.getElementById('discord-members')
+        if (el && data.approximate_member_count) {
+            el.textContent = data.approximate_member_count.toLocaleString()
+        }
+    } catch(e) {
+        console.log('Discord API error:', e)
+    }
+}
+
+// Fetch on page load
+fetchDiscordMembers()
+
 // ── NAV ──
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', e => {
@@ -433,6 +428,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
         item.classList.add('active')
         document.getElementById(`page-${page}`).classList.add('active')
+        if (page === 'discord') fetchDiscordMembers()
     })
 })
 
@@ -471,6 +467,99 @@ function doLogout() {
     }
 }
 
+// ── NEWS SYSTEM ──
+let newsData = []
+
+async function fetchNews() {
+    try {
+        const res = await fetch('https://api.github.com/repos/Z1PPYCAT/VortexLauncher/releases', {
+            headers: { 'Accept': 'application/vnd.github.v3+json' }
+        })
+        const releases = await res.json()
+        if (Array.isArray(releases)) {
+            newsData = releases
+            updateActivityBar()
+        }
+    } catch(e) {
+        console.log('News fetch error:', e)
+    }
+}
+
+function updateActivityBar() {
+    if (newsData.length > 0) {
+        const latest = newsData[0]
+        const actText = document.querySelector('.act-text')
+        if (actText) actText.textContent = `Vortex ${latest.tag_name} released! ${latest.name}`
+    }
+}
+
+function showNewsModal() {
+    const existing = document.getElementById('news-modal')
+    if (existing) existing.remove()
+
+    const modal = document.createElement('div')
+    modal.id = 'news-modal'
+    modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        z-index: 9990;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `
+
+    const box = document.createElement('div')
+    box.style.cssText = `
+        background: #0f0e08;
+        border: 1px solid #3a3200;
+        border-radius: 12px;
+        width: 600px;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 24px;
+        box-shadow: 0 0 40px rgba(212,175,55,0.15);
+    `
+
+    let html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h2 style="color:#D4AF37;letter-spacing:3px;font-size:16px">📢 VORTEX NEWS</h2>
+            <button onclick="document.getElementById('news-modal').remove()" 
+                style="background:transparent;border:none;color:#6b6040;font-size:20px;cursor:pointer">✕</button>
+        </div>
+    `
+
+    if (newsData.length === 0) {
+        html += '<p style="color:#6b6040;text-align:center">No news yet — check back soon!</p>'
+    } else {
+        newsData.slice(0, 5).forEach(release => {
+            const date = new Date(release.published_at).toLocaleDateString()
+            const body = release.body || 'No release notes.'
+            html += `
+                <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #2a2400">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                        <span style="color:#D4AF37;font-weight:700;font-size:14px">${release.name || release.tag_name}</span>
+                        <span style="color:#4a4030;font-size:11px">${date}</span>
+                    </div>
+                    <div style="color:#6b6040;font-size:12px;line-height:1.6;white-space:pre-wrap">${body.substring(0, 300)}${body.length > 300 ? '...' : ''}</div>
+                    <a href="#" onclick="window.openExternal('${release.html_url}')" 
+                        style="color:#D4AF37;font-size:11px;text-decoration:none;margin-top:8px;display:inline-block">
+                        View on GitHub →
+                    </a>
+                </div>
+            `
+        })
+    }
+
+    box.innerHTML = html
+    modal.appendChild(box)
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove() })
+    document.body.appendChild(modal)
+}
+
+// Fetch news on launch
+fetchNews()
+
 // ── ACTIVITY BAR ──
 const activities = [
     'Vortex Launcher v0.1 released! Check out the latest features.',
@@ -506,9 +595,32 @@ function populateAccount(username, info, keyValue) {
     set('acc-tz', 'UTC' + (new Date().getTimezoneOffset() / -60 >= 0 ? '+' : '') + (new Date().getTimezoneOffset() / -60))
     set('acc-hwid', getHWID())
 
-    if (keyValue) {
-        const masked = '****-****-****-' + keyValue.slice(-4).toUpperCase()
-        set('acc-key', masked)
+    // Show masked key or HWID-based identifier
+    const hwid = getHWID()
+    const maskedKey = keyValue
+        ? '****-****-****-' + keyValue.slice(-4).toUpperCase()
+        : 'Linked to account'
+    set('acc-key', maskedKey)
+
+    // Set key status based on subscription
+    const keyStatusEl = document.getElementById('acc-key-status')
+    if (keyStatusEl) {
+        if (info && info.subscriptions && info.subscriptions[0]) {
+            const sub = info.subscriptions[0]
+            const exp = new Date(sub.expiry * 1000)
+            const now = new Date()
+            if (exp > now) {
+                keyStatusEl.textContent = '● Active'
+                keyStatusEl.className = 'sub-value green'
+            } else {
+                keyStatusEl.textContent = '● Expired'
+                keyStatusEl.className = 'sub-value'
+                keyStatusEl.style.color = '#ff4444'
+            }
+        } else {
+            keyStatusEl.textContent = '● Active'
+            keyStatusEl.className = 'sub-value green'
+        }
     }
 
     if (info && info.subscriptions && info.subscriptions[0]) {

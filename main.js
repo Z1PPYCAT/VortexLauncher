@@ -98,6 +98,52 @@ function createWindow() {
 app.whenReady().then(createWindow)
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit() })
 
+// ── KEYAUTH PROXY ──
+const KA_NAME    = 'Vortex'
+const KA_OWNERID = 'sRW8K7AFHZ'
+const KA_VER     = '1.0'
+
+ipcMain.handle('keyauth-init', async () => {
+    const https = require('https')
+    return new Promise((resolve) => {
+        const params = new URLSearchParams({
+            type: 'init',
+            name: KA_NAME,
+            ownerid: KA_OWNERID,
+            ver: KA_VER
+        })
+        https.get(`https://keyauth.win/api/1.2/?${params}`, (res) => {
+            let data = ''
+            res.on('data', chunk => data += chunk)
+            res.on('end', () => {
+                try { resolve(JSON.parse(data)) }
+                catch(e) { resolve({ success: false, message: 'Parse error' }) }
+            })
+        }).on('error', () => resolve({ success: false, message: 'Connection error' }))
+    })
+})
+
+ipcMain.handle('keyauth-request', async (event, type, fields, sid) => {
+    const https = require('https')
+    return new Promise((resolve) => {
+        const params = new URLSearchParams({
+            type,
+            sessionid: sid,
+            name: KA_NAME,
+            ownerid: KA_OWNERID,
+            ...fields
+        })
+        https.get(`https://keyauth.win/api/1.2/?${params}`, (res) => {
+            let data = ''
+            res.on('data', chunk => data += chunk)
+            res.on('end', () => {
+                try { resolve(JSON.parse(data)) }
+                catch(e) { resolve({ success: false, message: 'Parse error' }) }
+            })
+        }).on('error', () => resolve({ success: false, message: 'Connection error' }))
+    })
+})
+
 // ── UPDATE IPC ──
 ipcMain.handle('check-for-updates', async () => {
     try {
