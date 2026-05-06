@@ -25,18 +25,21 @@ async function keyauthRequest(type, fields = {}) {
 }
 
 // ── HWID ──
-function getHWID() {
-    const raw = [navigator.userAgent, navigator.language, navigator.platform, screen.width, screen.height, new Date().getTimezoneOffset()].join('|')
-    let h1 = 0, h2 = 0
-    for (let i = 0; i < raw.length; i++) {
-        const c = raw.charCodeAt(i)
-        h1 = Math.imul(31, h1) + c | 0
-        h2 = Math.imul(31, h2) + (c * 1337) | 0
+let _cachedHWID = null
+
+async function getHWIDAsync() {
+    if (_cachedHWID) return _cachedHWID
+    try {
+        _cachedHWID = await window.getMachineHWID()
+    } catch(e) {
+        // Fallback
+        _cachedHWID = 'VORTEX-' + Math.abs(navigator.userAgent.split('').reduce((a,c) => (a<<5)-a+c.charCodeAt(0)|0, 0)).toString(16).toUpperCase().padStart(24,'0')
     }
-    const p1 = Math.abs(h1).toString(16).toUpperCase().padStart(8, '0')
-    const p2 = Math.abs(h2).toString(16).toUpperCase().padStart(8, '0')
-    const p3 = Math.abs(h1 ^ h2).toString(16).toUpperCase().padStart(8, '0')
-    return `VORTEX-${p1}-${p2}-${p3}`
+    return _cachedHWID
+}
+
+function getHWID() {
+    return _cachedHWID || 'VORTEX-LOADING'
 }
 
 // ── Status ──
@@ -81,10 +84,17 @@ async function doLogin() {
     sessionId = null
     await initKeyAuth()
 
-    const data = await keyauthRequest('login', { username: user, pass: pass, hwid: getHWID() })
+    const hwid = await getHWIDAsync()
+    const data = await keyauthRequest('login', { username: user, pass: pass, hwid })
     hideLoading()
 
     if (data.success) {
+        // Save credentials if remember me checked
+        if (document.getElementById('remember-me').checked) {
+            saveCredentials(user, pass)
+        } else {
+            clearCredentials()
+        }
         showStatus('Login successful!')
         showLoading('LOADING VORTEX...')
         setTimeout(() => { hideLoading(); launchApp(user, data.info, '') }, 1500)
@@ -109,7 +119,8 @@ async function doRegister() {
     sessionId = null
     await initKeyAuth()
 
-    const data = await keyauthRequest('register', { username: user, pass: pass, key: key, hwid: getHWID() })
+    const hwid = await getHWIDAsync()
+    const data = await keyauthRequest('register', { username: user, pass: pass, key: key, hwid })
     hideLoading()
 
     if (data.success) {
@@ -458,10 +469,12 @@ document.addEventListener('click', e => {
 function doLogout() {
     if (confirm('Are you sure you want to logout?')) {
         sessionId = null
+        clearCredentials()
         document.getElementById('main-app').style.display = 'none'
         document.getElementById('login-page').style.display = 'flex'
         document.getElementById('login-user').value = ''
         document.getElementById('login-pass').value = ''
+        document.getElementById('remember-me').checked = false
         switchLoginTab('login')
         initKeyAuth()
     }
@@ -581,8 +594,58 @@ document.addEventListener('keypress', e => {
     if (document.getElementById('form-forgot') && document.getElementById('form-forgot').classList.contains('active')) doForgotPassword()
 })
 
+// ── REMEMBER ME ──
+function saveCredentials(username, password) {
+    const fs = require('fs')
+    const path = require('path')
+    const os = require('os')
+    const crypto = require('crypto')
+    try {
+        const credsFile = path.join(os.homedir(), 'AppData', 'Roaming', 'Vortex', 'creds.dat')
+        const data = JSON.stringify({ username, password: Buffer.from(password).toString('base64') })
+        fs.writeFileSync(credsFile, data, 'utf8')
+    } catch(e) {}
+}
+
+function loadCredentials() {
+    const fs = require('fs')
+    const path = require('path')
+    const os = require('os')
+    try {
+        const credsFile = path.join(os.homedir(), 'AppData', 'Roaming', 'Vortex', 'creds.dat')
+        if (!fs.existsSync(credsFile)) return null
+        const data = JSON.parse(fs.readFileSync(credsFile, 'utf8'))
+        return {
+            username: data.username,
+            password: Buffer.from(data.password, 'base64').toString()
+        }
+    } catch(e) { return null }
+}
+
+function clearCredentials() {
+    const fs = require('fs')
+    const path = require('path')
+    const os = require('os')
+    try {
+        const credsFile = path.join(os.homedir(), 'AppData', 'Roaming', 'Vortex', 'creds.dat')
+        if (fs.existsSync(credsFile)) fs.unlinkSync(credsFile)
+    } catch(e) {}
+}
+
+function loadSavedCredentials() {
+    const creds = loadCredentials()
+    if (creds) {
+        document.getElementById('login-user').value = creds.username
+        document.getElementById('login-pass').value = creds.password
+        document.getElementById('remember-me').checked = true
+        // Auto login
+        setTimeout(() => doLogin(), 500)
+    }
+}
+
 // ── INIT ──
-initKeyAuth()
+getHWIDAsync().then(h => { _cachedHWID = h; console.log('HWID:', h) })
+initKeyAuth().then(() => loadSavedCredentials())
 
 // ── POPULATE ACCOUNT PAGE ──
 function populateAccount(username, info, keyValue) {

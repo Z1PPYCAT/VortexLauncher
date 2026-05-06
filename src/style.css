@@ -1298,3 +1298,33 @@ body.theme-gold {
     box-shadow: 0 0 10px rgba(212,175,55,0.3);
     object-fit: cover;
 }
+
+/* ── REMEMBER ME ── */
+.remember-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.remember-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.remember-label input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--gold);
+    cursor: pointer;
+}
+
+.remember-text {
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.remember-text:hover {
+    color: var(--gold);
+}

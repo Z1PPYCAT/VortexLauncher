@@ -110,6 +110,48 @@ function createWindow() {
 app.whenReady().then(createWindow)
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit() })
 
+// ── PERSISTENT HWID ──
+const crypto = require('crypto')
+const os = require('os')
+const fs = require('fs')
+const path = require('path')
+
+function getOrCreateHWID() {
+    const hwidFile = path.join(os.homedir(), 'AppData', 'Roaming', 'Vortex', 'hwid.dat')
+    
+    // Create directory if needed
+    const dir = path.dirname(hwidFile)
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+    
+    // Return existing HWID if saved
+    if (fs.existsSync(hwidFile)) {
+        return fs.readFileSync(hwidFile, 'utf8').trim()
+    }
+    
+    // Generate new HWID from machine info
+    const machineId = [
+        os.hostname(),
+        os.platform(),
+        os.arch(),
+        os.cpus()[0]?.model || 'cpu',
+        os.totalmem().toString()
+    ].join('|')
+    
+    const hwid = 'VORTEX-' + crypto
+        .createHash('sha256')
+        .update(machineId)
+        .digest('hex')
+        .toUpperCase()
+        .substring(0, 24)
+    
+    // Save for future use
+    fs.writeFileSync(hwidFile, hwid, 'utf8')
+    return hwid
+}
+
+const MACHINE_HWID = getOrCreateHWID()
+console.log('[Vortex] HWID:', MACHINE_HWID)
+
 // ── KEYAUTH PROXY ──
 const KA_NAME    = 'Vortex'
 const KA_OWNERID = 'sRW8K7AFHZ'
@@ -135,8 +177,12 @@ ipcMain.handle('keyauth-init', async () => {
     })
 })
 
+ipcMain.handle('get-hwid', () => MACHINE_HWID)
+
 ipcMain.handle('keyauth-request', async (event, type, fields, sid) => {
     const https = require('https')
+    // Always use machine HWID for consistency
+    if (fields.hwid) fields.hwid = MACHINE_HWID
     return new Promise((resolve) => {
         const params = new URLSearchParams({
             type,
