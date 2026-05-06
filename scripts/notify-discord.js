@@ -8,7 +8,7 @@ const version = pkg.version
 
 const payload = JSON.stringify({
     username: '🌀 Vortex Updates',
-    avatar_url: 'https://raw.githubusercontent.com/Z1PPYCAT/VortexLauncher/main/src/assets/icon.png',
+    avatar_url: 'https://cdn.discordapp.com/attachments/1501442936963993631/1501443289671536711/e32c00d2-60e7-4c18-b1fa-e5cbf2f36bd2.png?ex=69fc1787&is=69fac607&hm=e09ee2230e0eca7f647bac88d5828270aa5a9deb86716fce900277a91d190371&',
     embeds: [{
         title: `🌀 Vortex Launcher v${version} Released!`,
         description: `A new version of Vortex Launcher is now available!\n\n**Whats new in v${version}:**\n> Check the full changelog on GitHub`,
@@ -18,10 +18,10 @@ const payload = JSON.stringify({
             { name: '🔄 Auto Update', value: 'Open your launcher to update automatically!', inline: true }
         ],
         image: {
-            url: 'https://raw.githubusercontent.com/Z1PPYCAT/VortexLauncher/main/src/assets/icon512.png'
+            url: 'https://cdn.discordapp.com/attachments/1501442936963993631/1501442973689188372/f178ba61-e16c-4e48-a5a5-45bb4b001318.png?ex=69fc173c&is=69fac5bc&hm=ca674974a599c7e28c77feaf6da62826252e89299ff119396ad9fbfb6c5a4e8a&'
         },
         thumbnail: {
-            url: 'https://raw.githubusercontent.com/Z1PPYCAT/VortexLauncher/main/src/assets/icon.png'
+            url: 'https://cdn.discordapp.com/attachments/1501442936963993631/1501443289671536711/e32c00d2-60e7-4c18-b1fa-e5cbf2f36bd2.png?ex=69fc1787&is=69fac607&hm=e09ee2230e0eca7f647bac88d5828270aa5a9deb86716fce900277a91d190371&'
         },
         footer: { text: 'Vortex Launcher • TheTechGuy' },
         timestamp: new Date().toISOString()

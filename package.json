@@ -1,12 +1,14 @@
 {
   "name": "vortex-launcher",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Vortex Launcher - Multi-game Enhancement Platform",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "obfuscate": "javascript-obfuscator src/renderer.js --output src/renderer.js --compact true --string-array true --rotate-string-array true --string-array-encoding rc4 --dead-code-injection true"
+    "obfuscate": "javascript-obfuscator src/renderer.js --output src/renderer.js --compact true --string-array true --rotate-string-array true --string-array-encoding rc4 --dead-code-injection true",
+    "notify": "node scripts/notify-discord.js",
+    "release": "npm run build -- --publish always && npm run notify"
   },
   "author": "TheTechGuy",
   "license": "ISC",
