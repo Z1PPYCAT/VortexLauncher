@@ -78,10 +78,19 @@ function createWindow() {
 
     // Check for updates immediately on launch
     mainWindow.webContents.once('did-finish-load', () => {
-        // Check immediately
-        autoUpdater.checkForUpdates().catch(err => {
-            console.log('[Updater] Check failed:', err.message)
-        })
+        // Timeout after 8 seconds if update check hangs
+        const updateTimeout = setTimeout(() => {
+            console.log('[Updater] Check timed out')
+            if (mainWindow) mainWindow.webContents.send('update-not-available')
+        }, 8000)
+
+        autoUpdater.checkForUpdates()
+            .then(() => clearTimeout(updateTimeout))
+            .catch(err => {
+                clearTimeout(updateTimeout)
+                console.log('[Updater] Check failed:', err.message)
+                if (mainWindow) mainWindow.webContents.send('update-not-available')
+            })
     })
 
     // ── SECURITY ──
