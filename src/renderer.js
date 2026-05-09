@@ -1,4 +1,5 @@
 // ── KeyAuth (credentials secured in main process) ──
+const { ipcRenderer } = require('electron')
 let sessionId = null
 
 async function initKeyAuth() {
@@ -726,6 +727,22 @@ function toggleGrid(el) {
         ? 'linear-gradient(rgba(212,175,55,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.025) 1px, transparent 1px)'
         : 'none'
 }
+
+function initAutoUpdateToggle() {
+    const checkbox = document.getElementById('set-update')
+    if (!checkbox) return
+
+    const saved = localStorage.getItem('vortex-auto-update-enabled')
+    checkbox.checked = saved !== 'false'
+    ipcRenderer.send('set-auto-update-enabled', checkbox.checked)
+
+    checkbox.addEventListener('change', () => {
+        localStorage.setItem('vortex-auto-update-enabled', checkbox.checked ? 'true' : 'false')
+        ipcRenderer.send('set-auto-update-enabled', checkbox.checked)
+    })
+}
+
+window.addEventListener('DOMContentLoaded', initAutoUpdateToggle)
 
 // Load saved theme
 const savedTheme = localStorage.getItem('vortex-theme') || 'dark'

@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const { autoUpdater } = require('electron-updater')
 
+let autoUpdateEnabled = true
+
 // ── AUTO UPDATER ──
 autoUpdater.autoDownload = true
 autoUpdater.autoInstallOnAppQuit = true
@@ -8,8 +10,7 @@ autoUpdater.setFeedURL({
     provider: 'github',
     owner: 'Z1PPYCAT',
     repo: 'VortexLauncher',
-    private: true,
-    token: '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'
+    releaseType: 'release'
 })
 
 autoUpdater.on('checking-for-update', () => {
@@ -49,7 +50,7 @@ autoUpdater.on('update-not-available', () => {
 
 autoUpdater.on('error', (err) => {
     console.log('[Updater] Error:', err.message)
-    if (mainWindow) mainWindow.webContents.send('update-error')
+    if (mainWindow) mainWindow.webContents.send('update-error', err.message || err.toString())
 })
 const path = require('path')
 const https = require('https')
@@ -84,12 +85,26 @@ function createWindow() {
             if (mainWindow) mainWindow.webContents.send('update-not-available')
         }, 8000)
 
+        if (!app.isPackaged) {
+            console.log('[Updater] Skipping update check in development mode')
+            clearTimeout(updateTimeout)
+            if (mainWindow) mainWindow.webContents.send('update-not-available')
+            return
+        }
+
+        if (!autoUpdateEnabled) {
+            console.log('[Updater] Auto update is disabled')
+            clearTimeout(updateTimeout)
+            if (mainWindow) mainWindow.webContents.send('update-not-available')
+            return
+        }
+
         autoUpdater.checkForUpdates()
             .then(() => clearTimeout(updateTimeout))
             .catch(err => {
                 clearTimeout(updateTimeout)
                 console.log('[Updater] Check failed:', err.message)
-                if (mainWindow) mainWindow.webContents.send('update-not-available')
+                if (mainWindow) mainWindow.webContents.send('update-error', err.message)
             })
     })
 
@@ -210,12 +225,26 @@ ipcMain.handle('keyauth-request', async (event, type, fields, sid) => {
 
 // ── UPDATE IPC ──
 ipcMain.handle('check-for-updates', async () => {
+    if (!app.isPackaged) {
+        return { success: false, message: 'Updates are only available in packaged builds.' }
+    }
+    if (!autoUpdateEnabled) {
+        return { success: false, message: 'Auto update is disabled.' }
+    }
     try {
         const result = await autoUpdater.checkForUpdates()
         return { success: true, version: result?.updateInfo?.version }
     } catch(e) {
+        if (mainWindow) mainWindow.webContents.send('update-error', e.message || e.toString())
         return { success: false, message: e.message }
     }
+})
+
+ipcMain.handle('get-auto-update-enabled', () => autoUpdateEnabled)
+
+ipcMain.on('set-auto-update-enabled', (event, enabled) => {
+    autoUpdateEnabled = Boolean(enabled)
+    console.log('[Updater] Auto update enabled:', autoUpdateEnabled)
 })
 
 ipcMain.on('install-update', () => {

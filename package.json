@@ -1,6 +1,6 @@
 {
   "name": "vortex-launcher",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Vortex Launcher - Multi-game Enhancement Platform",
   "main": "main.js",
   "scripts": {
@@ -58,7 +58,6 @@
       "provider": "github",
       "owner": "Z1PPYCAT",
       "repo": "VortexLauncher",
-      "private": true,
       "releaseType": "release"
     }
   },

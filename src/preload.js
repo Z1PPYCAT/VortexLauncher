@@ -172,15 +172,16 @@ ipcRenderer.on('update-not-available', () => {
     }
 })
 
-ipcRenderer.on('update-error', () => {
-    // Hide update screen on error too
+ipcRenderer.on('update-error', (event, message) => {
     const checkScreen = document.getElementById('update-check-screen')
+    const checkMsg = document.getElementById('update-check-msg')
+    if (checkMsg) checkMsg.textContent = 'UPDATE ERROR: ' + (message || 'Unable to check updates')
     if (checkScreen) {
         setTimeout(() => {
             checkScreen.style.opacity = '0'
             checkScreen.style.transition = 'opacity 0.5s'
             setTimeout(() => checkScreen.style.display = 'none', 500)
-        }, 1000)
+        }, 2000)
     }
 })
 
