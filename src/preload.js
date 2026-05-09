@@ -167,15 +167,28 @@ function setLoginStatus(msg, color, dotColor) {
 
 ipcRenderer.on('update-available', (event, version) => {
     setLoginStatus('UPDATE FOUND v' + version + ' - DOWNLOADING...', '#D4AF37', '#D4AF37')
+    // Show download banner
+    const banner = document.createElement('div')
+    banner.id = 'update-dl-banner'
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#2a2000,#1a1400);border-bottom:2px solid #D4AF37;padding:10px 20px;display:flex;align-items:center;gap:12px;z-index:99999;'
+    banner.innerHTML = '<span style="color:#D4AF37;font-size:12px;letter-spacing:2px;font-weight:700;">⬇️ DOWNLOADING UPDATE v' + version + '...</span><span id="dl-pct" style="color:#8B6914;font-size:11px;">0%</span>'
+    document.body.appendChild(banner)
 })
 
 ipcRenderer.on('update-progress', (event, pct) => {
     setLoginStatus('DOWNLOADING... ' + pct + '%', '#D4AF37', '#D4AF37')
+    const pctEl = document.getElementById('dl-pct')
+    if (pctEl) pctEl.textContent = pct + '%'
 })
 
 ipcRenderer.on('update-downloaded', (event, version) => {
-    setLoginStatus('UPDATE READY - RESTARTING...', '#4CAF50', '#4CAF50')
-    setTimeout(() => window.installUpdate(), 2000)
+    setLoginStatus('UPDATE READY! CLICK TO INSTALL v' + version, '#4CAF50', '#4CAF50')
+    // Show a notification bar at top instead of auto-installing
+    const banner = document.createElement('div')
+    banner.id = 'update-ready-banner'
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#1a3a1a,#0f2a0f);border-bottom:2px solid #4CAF50;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;z-index:99999;'
+    banner.innerHTML = '<span style="color:#4CAF50;font-size:12px;letter-spacing:2px;font-weight:700;">🚀 UPDATE v' + version + ' READY TO INSTALL</span><button onclick="window.installUpdate()" style="background:#4CAF50;border:none;color:#000;padding:6px 16px;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;">INSTALL NOW</button>'
+    document.body.appendChild(banner)
 })
 
 ipcRenderer.on('update-not-available', () => {
