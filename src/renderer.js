@@ -434,7 +434,7 @@ const gameDefinitions = [
     { name: 'Grounded',        status: 'active', steamId: 962130,   trainerKey: 'grounded'   },
     { name: 'Red Dead 2',      status: 'active', steamId: 1174180,  trainerKey: 'reddead2'   },
     { name: 'Raft',            status: 'active', steamId: 648800,   trainerKey: 'raft'       },
-    { name: 'Minecraft',       status: 'soon',   steamId: 0,        trainerKey: 'minecraft', customCover: 'https://www.minecraft.net/content/dam/games/minecraft/key-art/MC-Playstyle_Vanilla_1280x768.jpg'  },
+    { name: 'Minecraft',       status: 'soon',   steamId: 0,        trainerKey: 'minecraft', customCover: 'https://upload.wikimedia.org/wikipedia/en/5/51/Minecraft_cover.png'  },
     { name: 'Project Zomboid', status: 'soon',   steamId: 108600,   trainerKey: 'zomboid'    },
     { name: 'DayZ',            status: 'soon',   steamId: 221100,   trainerKey: 'dayz'       },
 ]
