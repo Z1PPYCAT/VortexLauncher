@@ -716,8 +716,8 @@ function loadSavedCredentials() {
         document.getElementById('login-user').value = creds.username
         document.getElementById('login-pass').value = creds.password
         document.getElementById('remember-me').checked = true
-        // Auto login
-        setTimeout(() => doLogin(), 500)
+        // Auto login after 3 seconds so user can see update status
+        setTimeout(() => doLogin(), 3000)
     }
 }
 
