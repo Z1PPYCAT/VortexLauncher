@@ -1,5 +1,14 @@
 // ── KeyAuth (credentials secured in main process) ──
 const { ipcRenderer } = require('electron')
+
+// Set version in footer
+try {
+    const ver = require('../package.json').version
+    document.addEventListener('DOMContentLoaded', () => {
+        const el = document.getElementById('login-version')
+        if (el) el.textContent = 'v' + ver
+    })
+} catch(e) {}
 let sessionId = null
 
 async function initKeyAuth() {
@@ -302,7 +311,7 @@ async function launchTrainer(gameName, btn) {
 
         if (!fs.existsSync(vortexDir)) fs.mkdirSync(vortexDir, { recursive: true })
 
-        const url = 'https://vortex-server-production.up.railway.app/api/trainer/' + gameName
+        const url = 'http://2.24.88.146:3000/api/trainer/' + gameName
         setActivityTrainer('Downloading trainer...')
 
         const hwid = getHWID()
@@ -312,7 +321,7 @@ async function launchTrainer(gameName, btn) {
         await new Promise((resolve, reject) => {
             const file = fs.createWriteStream(trainerPath)
             const options = {
-                hostname: 'vortex-server-production.up.railway.app',
+                hostname: '2.24.88.146',
                 path: '/api/trainer/' + gameName,
                 method: 'POST',
                 headers: {
@@ -425,7 +434,7 @@ const gameDefinitions = [
     { name: 'Grounded',        status: 'active', steamId: 962130,   trainerKey: 'grounded'   },
     { name: 'Red Dead 2',      status: 'active', steamId: 1174180,  trainerKey: 'reddead2'   },
     { name: 'Raft',            status: 'active', steamId: 648800,   trainerKey: 'raft'       },
-    { name: 'Minecraft',       status: 'soon',   steamId: 0,        trainerKey: 'minecraft'  },
+    { name: 'Minecraft',       status: 'soon',   steamId: 0,        trainerKey: 'minecraft', customCover: 'https://www.minecraft.net/content/dam/games/minecraft/key-art/MC-Playstyle_Vanilla_1280x768.jpg'  },
     { name: 'Project Zomboid', status: 'soon',   steamId: 108600,   trainerKey: 'zomboid'    },
     { name: 'DayZ',            status: 'soon',   steamId: 221100,   trainerKey: 'dayz'       },
 ]
@@ -455,9 +464,9 @@ function renderGames(filter = 'all', search = '') {
         const card = document.createElement('div')
         card.className = 'game-card'
 
-        const coverUrl = game.steamId > 0
+        const coverUrl = game.customCover || (game.steamId > 0
             ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${game.steamId}/library_600x900.jpg`
-            : ''
+            : '')
 
         const statusHtml = !game.installed
             ? `<div class="game-status s-none"><div class="sdot"></div>Not Installed</div>`

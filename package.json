@@ -1,6 +1,6 @@
 {
   "name": "vortex-launcher",
-  "version": "0.4.1",
+  "version": "0.4.3",
   "description": "Vortex Launcher - Multi-game Enhancement Platform",
   "main": "main.js",
   "scripts": {
