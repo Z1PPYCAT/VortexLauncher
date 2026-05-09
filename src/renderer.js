@@ -48,14 +48,23 @@ async function keyauthRequest(type, fields = {}) {
 let _cachedHWID = null
 
 async function getHWIDAsync() {
-    if (_cachedHWID) return _cachedHWID
+    if (_cachedHWID && _cachedHWID !== 'VORTEX-LOADING') return _cachedHWID
     try {
-        _cachedHWID = await window.getMachineHWID()
-    } catch(e) {
-        // Fallback
-        _cachedHWID = 'VORTEX-' + Math.abs(navigator.userAgent.split('').reduce((a,c) => (a<<5)-a+c.charCodeAt(0)|0, 0)).toString(16).toUpperCase().padStart(24,'0')
-    }
-    return _cachedHWID
+        const hwid = await window.getMachineHWID()
+        if (hwid) { _cachedHWID = hwid; return hwid }
+    } catch(e) {}
+    // Fallback - read from file using Node
+    try {
+        const fs = require('fs')
+        const path = require('path')
+        const os = require('os')
+        const hwidFile = path.join(os.homedir(), 'AppData', 'Roaming', 'Vortex', 'hwid.dat')
+        if (fs.existsSync(hwidFile)) {
+            _cachedHWID = fs.readFileSync(hwidFile, 'utf8').trim()
+            return _cachedHWID
+        }
+    } catch(e) {}
+    return 'VORTEX-UNKNOWN'
 }
 
 function getHWID() {

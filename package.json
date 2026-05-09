@@ -1,6 +1,6 @@
 {
   "name": "vortex-launcher",
-  "version": "0.1.9",
+  "version": "0.2.6",
   "description": "Vortex Launcher - Multi-game Enhancement Platform",
   "main": "main.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "electron-builder",
     "obfuscate": "javascript-obfuscator src/renderer.js --output src/renderer.js --compact true --string-array true --rotate-string-array true --string-array-encoding rc4 --dead-code-injection true",
     "notify": "node scripts/notify-discord.js",
-    "release": "npm run build -- --publish always && npm run notify"
+    "release": "npm run build && node scripts/release.js"
   },
   "author": "TheTechGuy",
   "license": "ISC",
@@ -54,12 +54,12 @@
       "installerIcon": "build-icon.ico",
       "uninstallerIcon": "build-icon.ico"
     },
-    "publish": {
-      "provider": "github",
-      "owner": "Z1PPYCAT",
-      "repo": "VortexLauncher",
-      "releaseType": "release"
-    }
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "http://2.24.88.146:3000/updates"
+      }
+    ]
   },
   "dependencies": {
     "electron-log": "^5.4.3",
