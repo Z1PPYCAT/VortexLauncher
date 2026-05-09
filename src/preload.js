@@ -158,6 +158,34 @@ ipcRenderer.on('update-downloaded', (event, version) => {
     }
 })
 
+function setLoginStatus(msg, color, dotColor) {
+    const status = document.getElementById('login-update-status')
+    const dot = document.getElementById('login-status-dot')
+    if (status) { status.textContent = msg; status.style.color = color }
+    if (dot) { dot.style.background = dotColor; dot.style.animation = dotColor === '#D4AF37' ? 'pulse-dot 1s ease-in-out infinite' : 'none' }
+}
+
+ipcRenderer.on('update-available', (event, version) => {
+    setLoginStatus('UPDATE FOUND v' + version + ' - DOWNLOADING...', '#D4AF37', '#D4AF37')
+})
+
+ipcRenderer.on('update-progress', (event, pct) => {
+    setLoginStatus('DOWNLOADING... ' + pct + '%', '#D4AF37', '#D4AF37')
+})
+
+ipcRenderer.on('update-downloaded', (event, version) => {
+    setLoginStatus('UPDATE READY - RESTARTING...', '#4CAF50', '#4CAF50')
+    setTimeout(() => window.installUpdate(), 2000)
+})
+
+ipcRenderer.on('update-not-available', () => {
+    setLoginStatus('UP TO DATE', '#4CAF50', '#4CAF50')
+})
+
+ipcRenderer.on('update-error', () => {
+    setLoginStatus('SERVER OFFLINE', '#ff4444', '#ff4444')
+})
+
 ipcRenderer.on('update-not-available', () => {
     // Hide update screen and show login
     const checkScreen = document.getElementById('update-check-screen')

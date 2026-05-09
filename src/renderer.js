@@ -4,14 +4,24 @@ let sessionId = null
 
 async function initKeyAuth() {
     try {
-        const data = await window.kaInit()
+        const https = require('https')
+        const data = await new Promise((resolve) => {
+            https.get('https://keyauth.win/api/1.2/?type=init&name=Vortex&ownerid=sRW8K7AFHZ&ver=1.0', (res) => {
+                let body = ''
+                res.on('data', c => body += c)
+                res.on('end', () => { try { resolve(JSON.parse(body)) } catch(e) { resolve({success:false, message:'Parse error'}) } })
+            }).on('error', (e) => { console.error('KeyAuth error:', e); resolve({success:false, message:'Connection error'}) })
+        })
+        console.log('[KeyAuth] Init result:', data.success, data.message)
         if (!data.success) return false
         sessionId = data.sessionid
         return true
     } catch(e) {
+        console.error('[KeyAuth] Init exception:', e)
         return false
     }
 }
+
 
 async function keyauthRequest(type, fields = {}) {
     if (!sessionId) {
@@ -19,11 +29,20 @@ async function keyauthRequest(type, fields = {}) {
         if (!ok) return { success: false, message: 'Failed to connect to auth server!' }
     }
     try {
-        return await window.kaRequest(type, fields, sessionId)
+        const https = require('https')
+        return await new Promise((resolve) => {
+            const params = new URLSearchParams({ type, sessionid: sessionId, name: 'Vortex', ownerid: 'sRW8K7AFHZ', ...fields })
+            https.get('https://keyauth.win/api/1.2/?' + params, (res) => {
+                let body = ''
+                res.on('data', c => body += c)
+                res.on('end', () => { try { resolve(JSON.parse(body)) } catch(e) { resolve({success:false, message:'Parse error'}) } })
+            }).on('error', () => resolve({success:false, message:'Connection error'}))
+        })
     } catch(e) {
         return { success: false, message: 'Connection error' }
     }
 }
+
 
 // ── HWID ──
 let _cachedHWID = null
@@ -129,6 +148,55 @@ async function doRegister() {
         setTimeout(() => { hideLoading(); launchApp(user, data.info, key) }, 1500)
     } else {
         showStatus(data.message || 'Registration failed!', true)
+    }
+}
+
+// ── RENEW KEY ──
+async function doRenewKey() {
+    try {
+        const user = document.getElementById('renew-user').value.trim()
+        const key = document.getElementById('renew-key').value.trim()
+
+        if (!user || !key) { showStatus('All fields are required!', true); return }
+
+        clearStatus()
+        showLoading('RENEWING LICENSE...')
+
+        sessionId = null
+        await initKeyAuth()
+        const currentSession = sessionId
+
+        const upgradeData = await new Promise((resolve) => {
+            const https = require('https')
+            const params = new URLSearchParams({
+                type: 'upgrade',
+                sessionid: currentSession,
+                name: 'Vortex',
+                ownerid: 'sRW8K7AFHZ',
+                username: user,
+                key: key
+            })
+            https.get('https://keyauth.win/api/1.2/?' + params, (res) => {
+                let body = ''
+                res.on('data', chunk => body += chunk)
+                res.on('end', () => { try { resolve(JSON.parse(body)) } catch(e) { resolve({ success: false, message: 'Parse error' }) } })
+            }).on('error', () => resolve({ success: false, message: 'Connection error' }))
+        })
+
+        hideLoading()
+
+        if (upgradeData.success) {
+            showStatus('License renewed! Please login.')
+            setTimeout(() => {
+                document.getElementById('login-user').value = user
+                switchLoginTab('login')
+            }, 1500)
+        } else {
+            showStatus(upgradeData.message || 'Invalid key!', true)
+        }
+    } catch(e) {
+        hideLoading()
+        showStatus('Error: ' + e.message, true)
     }
 }
 
@@ -747,3 +815,18 @@ window.addEventListener('DOMContentLoaded', initAutoUpdateToggle)
 // Load saved theme
 const savedTheme = localStorage.getItem('vortex-theme') || 'dark'
 setTheme(savedTheme)
+
+
+// ── WINDOW CONTROLS ──
+;(function initWindowControls() {
+    const attach = () => {
+        const min = document.getElementById('btn-min')
+        const max = document.getElementById('btn-max')
+        const close = document.getElementById('btn-close')
+        if (min) min.onclick = () => require('electron').ipcRenderer.send('minimize')
+        if (max) max.onclick = () => require('electron').ipcRenderer.send('maximize')
+        if (close) close.onclick = () => require('electron').ipcRenderer.send('close')
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attach)
+    else attach()
+})()

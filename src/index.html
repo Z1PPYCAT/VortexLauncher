@@ -8,19 +8,6 @@
 <body>
 
     <!-- Pre-login Update Check Screen -->
-    <div id="update-check-screen" style="display:flex;position:fixed;inset:0;background:#0a0a06;z-index:99998;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
-        <img src="../src/assets/icon.png" style="width:80px;height:80px;border-radius:50%;border:2px solid #D4AF37;box-shadow:0 0 30px rgba(212,175,55,0.5)">
-        <div style="color:#D4AF37;font-size:24px;font-weight:900;letter-spacing:6px;">VORTEX</div>
-        <div class="loading-spinner-ring"></div>
-        <div id="update-check-msg" style="color:#6b6040;font-size:11px;letter-spacing:2px;">CHECKING FOR UPDATES...</div>
-        <div id="update-check-progress" style="display:none;width:300px;">
-            <div style="background:#1a1600;border-radius:4px;height:4px;overflow:hidden;border:1px solid #2a2400">
-                <div id="update-progress-bar" style="height:100%;background:linear-gradient(90deg,#D4AF37,#8B6914);width:0%;transition:width 0.3s"></div>
-            </div>
-            <div id="update-progress-pct" style="color:#D4AF37;font-size:11px;text-align:center;margin-top:6px">0%</div>
-        </div>
-    </div>
-
     <!-- Loading Screen -->
     <div id="loading-screen" style="display:none;position:fixed;inset:0;background:#0a0a06;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
         <div class="loading-logo-circle">V</div>
@@ -56,6 +43,7 @@
                 <button class="login-tab active" data-tab="login" onclick="switchLoginTab('login')">LOGIN</button>
                 <button class="login-tab" data-tab="register" onclick="switchLoginTab('register')">REGISTER</button>
                 <button class="login-tab" data-tab="forgot" onclick="switchLoginTab('forgot')">FORGOT</button>
+                <button class="login-tab" data-tab="renew" onclick="switchLoginTab('renew')">RENEW</button>
             </div>
 
             <div id="login-status" style="display:none;text-align:center;font-size:12px;margin:8px 0;padding:8px;border-radius:4px;background:rgba(0,0,0,0.3)"></div>
@@ -68,6 +56,12 @@
                 <div class="input-group">
                     <label>PASSWORD</label>
                     <input type="password" id="login-pass" placeholder="Enter your password">
+                </div>
+                <div class="remember-row">
+                    <label class="remember-label">
+                        <input type="checkbox" id="remember-me">
+                        <span class="remember-text">Remember me</span>
+                    </label>
                 </div>
                 <button class="login-btn" id="btn-login" onclick="doLogin()">
                     <span>LOGIN</span><span class="btn-arrow">&#8594;</span>
@@ -118,10 +112,33 @@
                 </div>
             </div>
 
+            <!-- Renew Key Form -->
+            <div id="form-renew" class="login-form-section">
+                <div class="input-group">
+                    <label>USERNAME</label>
+                    <input type="text" id="renew-user" placeholder="Enter your username">
+                </div>
+                <div class="input-group">
+                    <label>NEW LICENSE KEY</label>
+                    <input type="text" id="renew-key" placeholder="XXXXX-XXXXX-XXXXX-XXXXX">
+                </div>
+                <button class="login-btn" onclick="doRenewKey()">
+                    <span>RENEW LICENSE</span><span class="btn-arrow">&#8594;</span>
+                </button>
+                <div class="login-links">
+                    <a href="#" onclick="switchLoginTab('login')">Back to login</a>
+                    <a href="#" onclick="window.openExternal('https://discord.gg/wdrj5auhEB')">Buy a key</a>
+                </div>
+            </div>
+
             <div class="login-footer">
-                <span>v0.1</span><span>&#8226;</span>
+                <span id="login-version">v0.2</span><span>&#8226;</span>
                 <span>Vortex Launcher</span><span>&#8226;</span>
                 <span>KeyAuth Protected</span>
+            </div>
+            <div style="margin-top:10px;background:#0a0a06;border:1px solid #2a2400;border-radius:6px;padding:8px 12px;display:flex;align-items:center;gap:8px;">
+                <div id="login-status-dot" style="width:6px;height:6px;border-radius:50%;background:#D4AF37;flex-shrink:0;animation:pulse-dot 1s ease-in-out infinite;"></div>
+                <span id="login-update-status" style="font-size:10px;color:#6b6040;letter-spacing:1px;flex:1;">CONNECTING TO SERVER...</span>
             </div>
         </div>
     </div>
@@ -149,9 +166,9 @@
                     <span class="user-chevron">⌄</span>
                 </div>
                 <div class="win-controls">
-                    <button onclick="window.minimize()" class="wc-btn">─</button>
-                    <button onclick="window.maximize()" class="wc-btn">□</button>
-                    <button onclick="window.closeApp()" class="wc-btn wc-close">✕</button>
+                    <button id="btn-min" class="wc-btn">─</button>
+                    <button id="btn-max" class="wc-btn">□</button>
+                    <button id="btn-close" class="wc-btn wc-close">✕</button>
                 </div>
             </div>
         </div>
